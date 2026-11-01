@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Employee Directory</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+  <p id="boot" class="muted">Loading…</p>
+
+  <section id="login" class="card narrow" hidden>
+    <h1>Employee Directory</h1>
+    <p class="muted">Sign in to continue.</p>
+    <form id="login-form">
+      <label for="login-email">Email</label>
+      <input id="login-email" type="email" autocomplete="username" required>
+      <label for="login-password">Password</label>
+      <input id="login-password" type="password" autocomplete="current-password" required>
+      <button id="login-btn" type="submit">Sign in</button>
+    </form>
+    <p id="login-msg" class="msg" hidden></p>
+  </section>
+
+  <section id="noaccess" class="card narrow" hidden>
+    <h1>No access yet</h1>
+    <p>Your account has no role assigned. Ask an admin to give you one, then sign in again.</p>
+    <button id="noaccess-signout" type="button" class="secondary">Sign out</button>
+  </section>
+
+  <section id="app" hidden>
+    <header class="topbar">
+      <h1>Employee Directory</h1>
+      <div class="who">
+        <span id="who" class="muted"></span>
+        <button id="signout" type="button" class="secondary">Sign out</button>
+      </div>
+    </header>
+
+    <nav id="tabs" class="tabs"></nav>
+
+    <div id="tab-employees" class="card">
+      <div class="row">
+        <input id="search" type="search" placeholder="Search name, email, phone or address" aria-label="Search employees">
+        <span id="count" class="muted"></span>
+      </div>
+      <p id="employees-msg" class="msg" hidden></p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Address</th></tr></thead>
+          <tbody id="employees-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-import" class="card" hidden>
+      <h2>Import employees from CSV</h2>
+      <p class="muted">Every row is checked first. Nothing is saved unless the whole file is clean. Uploading an email that already exists updates that employee. Imports never delete anything.</p>
+      <div class="row">
+        <input id="csv-file" type="file" accept=".csv,text/csv" aria-label="Choose a CSV file">
+        <button id="download-template" type="button" class="secondary">Download template</button>
+      </div>
+      <p id="import-msg" class="msg" hidden></p>
+      <div id="import-report"></div>
+      <button id="import-go" type="button" hidden disabled>Import</button>
+    </div>
+
+    <div id="tab-users" class="card" hidden>
+      <h2>Users and roles</h2>
+      <p class="muted">Create accounts in the Supabase dashboard (Authentication, then Users), then set each person's role here.</p>
+      <p id="users-msg" class="msg" hidden></p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Account</th><th>Role</th><th>Last sign-in</th></tr></thead>
+          <tbody id="users-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="config.js"></script>
+<script src="validate.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
