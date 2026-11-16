@@ -145,3 +145,8 @@ button:disabled { cursor: wait; opacity: .7; }
 .employee-pagination-controls { display: flex; align-items: center; gap: 10px; }
 .employee-pagination-controls .secondary-button { min-height: 34px; padding: 0 11px; font-size: 10px; }
 .employee-pagination-controls .secondary-button:disabled { opacity: .45; cursor: not-allowed; }
+
+@media (max-width: 520px) {
+  .employee-pagination { align-items: stretch; flex-direction: column; }
+  .employee-pagination-controls { justify-content: space-between; }
+}
