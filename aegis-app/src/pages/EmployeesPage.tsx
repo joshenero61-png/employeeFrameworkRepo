@@ -45,7 +45,7 @@ function getClient() {
 }
 
 export default function EmployeesPage() {
-  const { roles, signOut } = useAuth()
+  const { roles, session, signOut } = useAuth()
   const queryClient = useQueryClient()
   const canManage = roles.includes('admin') || roles.includes('hr_manager')
   const [search, setSearch] = useState('')
@@ -56,7 +56,7 @@ export default function EmployeesPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
 
   const employeesQuery = useQuery({
-    queryKey: ['employees', canManage],
+    queryKey: ['employees', session?.user.id ?? null, canManage, roles.join(',')],
     queryFn: async () => {
       const client = getClient()
       const result = canManage
@@ -186,6 +186,7 @@ export default function EmployeesPage() {
   async function handleSignOut() {
     try {
       await signOut()
+      queryClient.clear()
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : 'Unable to sign out.')
     }
