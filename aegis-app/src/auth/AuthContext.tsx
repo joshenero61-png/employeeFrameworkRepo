@@ -34,7 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authError, setAuthError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!supabase) {
+    const client = supabase
+    if (!client) {
       setSessionLoading(false)
       return
     }
@@ -42,14 +43,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let mounted = true
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    } = client.auth.onAuthStateChange((_event, nextSession) => {
       if (!mounted) return
       setSession(nextSession)
       setSessionLoading(false)
       setAuthError(null)
     })
 
-    void supabase.auth.getSession().then(({ data, error }) => {
+    void client.auth.getSession().then(({ data, error }) => {
       if (!mounted) return
       if (error) setAuthError(error.message)
       setSession(data.session)
@@ -63,7 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (!supabase || !session?.user.id) {
+    const client = supabase
+    if (!client || !session?.user.id) {
       setAccount(null)
       setRoles([])
       setAuthorizationLoading(false)
@@ -76,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const loadAuthorization = async () => {
       try {
-        const { data: accountData, error: accountError } = await supabase
+        const { data: accountData, error: accountError } = await client
           .from('user_accounts')
           .select('user_id, employee_id, username, display_name, is_active, created_at, updated_at')
           .eq('user_id', session.user.id)
@@ -92,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return
         }
 
-        const { data: assignments, error: assignmentError } = await supabase
+        const { data: assignments, error: assignmentError } = await client
           .from('user_role_assignments')
           .select('role_id')
           .eq('user_id', session.user.id)
@@ -106,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return
         }
 
-        const { data: roleRows, error: roleError } = await supabase
+        const { data: roleRows, error: roleError } = await client
           .from('user_roles')
           .select('name')
           .in('id', roleIds)
@@ -131,14 +133,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session?.user.id])
 
   const signIn = useCallback(async (email: string, password: string) => {
-    if (!supabase) throw new Error('Supabase is not configured. Add the project URL and public key to .env.local.')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const client = supabase
+    if (!client) throw new Error('Supabase is not configured. Add the project URL and public key to .env.local.')
+    const { error } = await client.auth.signInWithPassword({ email, password })
     if (error) throw error
   }, [])
 
   const signOut = useCallback(async () => {
-    if (!supabase) return
-    const { error } = await supabase.auth.signOut()
+    const client = supabase
+    if (!client) return
+    const { error } = await client.auth.signOut()
     if (error) throw error
   }, [])
 
