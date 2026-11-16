@@ -19,7 +19,7 @@ Working branch: `aegis-development`
 
 ## Latest verified evidence
 
-- Vercel preview build for commit `9607e53ac095a3089367996fa407c2e09ce5f590`: READY.
+- Vercel preview build for repository head `07e657f1178d9c12bf76e32e97562c9ecf6002d3`: READY.
 - Dependency audit in that build: 0 vulnerabilities.
 - Automated tests in that build: 12 passed across 2 test files.
 - TypeScript check and Vite production build: passed.
@@ -31,7 +31,7 @@ Working branch: `aegis-development`
 - Security advisor after the employee-directory hardening: only the previously acknowledged leaked-password-protection warning remains.
 - Performance advisor reports 20 unused indexes. These are informational on the current test dataset and have not been removed.
 
-The latest application code includes bounded pagination and the employee-directory RPC. Subsequent changes restored migration source files and added Supabase CLI documentation/configuration; the latest Vercel preview for the repository head is queued.
+The latest application code includes bounded pagination and the employee-directory RPC. The latest Vercel preview for the repository head is READY.
 
 ## Database security changes applied
 
@@ -45,7 +45,7 @@ The latest application code includes bounded pagination and the employee-directo
 
 ### Clean-environment migration verification
 
-All 15 migration files have now been restored from the hosted migration ledger and verified against the recorded SQL statements. The clean-environment migration chain has not yet been executed in a disposable local database or Supabase branch. Do not run a destructive reset against the connected remote project.
+All 15 migration files have now been restored from the hosted migration ledger and verified against the recorded SQL statements. The clean-environment migration chain has not yet been executed in a disposable local database or Supabase branch. Creating a Supabase validation branch requires explicit hourly-cost approval; no branch was created. Do not run a destructive reset against the connected remote project.
 
 ### Reproducible dependency installation
 
