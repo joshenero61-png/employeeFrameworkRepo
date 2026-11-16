@@ -47,12 +47,20 @@ as $function$
       or last_name ilike '%' || btrim(p_search) || '%'
   ),
   counted_employees as (
-    select f.*, count(*) over () as total_count
+    select
+      f.*,
+      count(*) over () as total_count
     from filtered_employees f
   )
   select
-    c.id, c.first_name, c.last_name, c.department_id, c.position_id,
-    c.hire_date, c.status, c.total_count
+    c.id,
+    c.first_name,
+    c.last_name,
+    c.department_id,
+    c.position_id,
+    c.hire_date,
+    c.status,
+    c.total_count
   from counted_employees c
   order by c.last_name, c.first_name
   limit least(greatest(coalesce(p_limit, 25), 1), 100)
