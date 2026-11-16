@@ -16,7 +16,7 @@ function ConfigurationScreen() {
       <div className="loading-mark">A</div>
       <p className="eyebrow">AEGIS · SETUP REQUIRED</p>
       <h1>Connect the Supabase project</h1>
-      <p>Add <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> to <code>.env.local</code> to enable sign-in.</p>
+      <p>Add <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_PUBLISHABLE_KEY</code> to <code>.env.local</code> to enable sign-in.</p>
       <p className="system-note">Use only the public/anon key in this browser application. Never use a service-role or secret key here.</p>
     </main>
   )
