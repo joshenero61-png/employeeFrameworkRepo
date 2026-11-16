@@ -14,14 +14,6 @@ export const employeeFormSchema = z.object({
   position_id: z.string().uuid('Choose a position.'),
   manager_id: z.union([z.string().uuid(), z.literal('')]),
   hire_date: dateOnly,
-}).superRefine((values, context) => {
-  if (values.termination_date && values.termination_date < values.hire_date) {
-    context.addIssue({
-      code: 'custom',
-      message: 'Termination date cannot be earlier than the hire date.',
-      path: ['termination_date'],
-    })
-  }
 })
 
 export type EmployeeForm = z.infer<typeof employeeFormSchema>
