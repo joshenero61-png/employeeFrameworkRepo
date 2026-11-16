@@ -207,8 +207,6 @@ export default function EmployeesPage() {
     }
   }
 
-  const displayName = account?.display_name || account?.username || 'Team member'
-
   return (
     <main className="workspace">
       <header className="topbar">
