@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../auth/AuthContext'
@@ -166,6 +166,9 @@ export default function EmployeesPage() {
   const totalPages = Math.ceil(totalCount / pageSize)
   const firstVisible = totalCount === 0 ? 0 : page * pageSize + 1
   const lastVisible = Math.min((page + 1) * pageSize, totalCount)
+  useEffect(() => {
+    if (!employeesQuery.isPending && page >= totalPages && page > 0) setPage(Math.max(totalPages - 1, 0))
+  }, [employeesQuery.isPending, page, totalPages])
   const departmentNames = useMemo(() => new Map(departments.map((item) => [item.id, item.name])), [departments])
   const positionNames = useMemo(() => new Map(positions.map((item) => [item.id, item.title])), [positions])
 
@@ -321,12 +324,12 @@ export default function EmployeesPage() {
               </table>
             </div>
           )}
-          {totalCount > pageSize && (
+          {(totalCount > pageSize || page > 0) && (
             <div className="employee-pagination">
               <span>Showing {firstVisible}–{lastVisible} of {totalCount}</span>
               <div className="employee-pagination-controls">
                 <button className="secondary-button" type="button" disabled={page === 0} onClick={() => setPage((current) => Math.max(0, current - 1))}>Previous</button>
-                <span>Page {page + 1} of {totalPages}</span>
+                <span>Page {page + 1} of {Math.max(totalPages, 1)}</span>
                 <button className="secondary-button" type="button" disabled={page + 1 >= totalPages} onClick={() => setPage((current) => current + 1)}>Next</button>
               </div>
             </div>
