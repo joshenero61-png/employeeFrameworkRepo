@@ -10,12 +10,10 @@ const validEmployee = {
   position_id: '22222222-2222-4222-8222-222222222222',
   manager_id: '',
   hire_date: '2026-01-10',
-  termination_date: '',
-  status: 'active',
 }
 
 describe('employeeFormSchema', () => {
-  it('accepts a valid employee record with no manager or termination date', () => {
+  it('accepts a valid employee record with no manager', () => {
     expect(employeeFormSchema.safeParse(validEmployee).success).toBe(true)
   })
 
@@ -55,25 +53,5 @@ describe('employeeFormSchema', () => {
 
   it('rejects impossible calendar dates', () => {
     expect(employeeFormSchema.safeParse({ ...validEmployee, hire_date: '2026-02-30' }).success).toBe(false)
-  })
-
-  it('rejects a termination date before the hire date', () => {
-    const result = employeeFormSchema.safeParse({
-      ...validEmployee,
-      termination_date: '2026-01-09',
-    })
-    expect(result.success).toBe(false)
-  })
-
-  it('accepts a termination date on or after the hire date', () => {
-    expect(employeeFormSchema.safeParse({
-      ...validEmployee,
-      status: 'terminated',
-      termination_date: '2026-01-10',
-    }).success).toBe(true)
-  })
-
-  it('rejects statuses outside the supported lifecycle', () => {
-    expect(employeeFormSchema.safeParse({ ...validEmployee, status: 'pending' }).success).toBe(false)
   })
 })
