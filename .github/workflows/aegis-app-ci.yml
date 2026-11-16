@@ -1,0 +1,33 @@
+name: AEGIS app CI
+
+on:
+  push:
+    branches:
+      - aegis-development
+    paths:
+      - "aegis-app/**"
+      - ".github/workflows/aegis-app-ci.yml"
+  pull_request:
+    paths:
+      - "aegis-app/**"
+      - ".github/workflows/aegis-app-ci.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: aegis-app
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: aegis-app/package-lock.json
+      - name: Install dependencies
+        run: npm install
+      - name: Type-check and build
+        run: npm run build
