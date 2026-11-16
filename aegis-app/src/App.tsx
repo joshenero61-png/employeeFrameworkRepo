@@ -1,21 +1,58 @@
-function App() {
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { useAuth } from './auth/AuthContext'
+import LoginPage from './pages/LoginPage'
+import DashboardPage from './pages/DashboardPage'
+import { isSupabaseConfigured } from './lib/supabase'
+
+function LoadingScreen() {
+  return <main className="system-screen"><div className="loading-mark">A</div><p>Preparing your workspace…</p></main>
+}
+
+function ConfigurationScreen() {
   return (
-    <main className="welcome">
-      <p className="eyebrow">AEGIS · HUMAN RESOURCES</p>
-      <h1>AEGIS HRIS</h1>
-      <p className="intro">
-        The application foundation is in place. We will now connect authentication,
-        role-based access, and the approved HRIS workflows to the existing Supabase project.
-      </p>
-      <div className="status">
-        <span className="status-dot" />
-        Development foundation
-      </div>
-      <p className="note">
-        No production data or existing deployment has been changed.
-      </p>
+    <main className="system-screen">
+      <div className="loading-mark">A</div>
+      <p className="eyebrow">AEGIS · SETUP REQUIRED</p>
+      <h1>Connect the Supabase project</h1>
+      <p>Add <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> to <code>.env.local</code> to enable sign-in.</p>
+      <p className="system-note">Use only the public/anon key in this browser application. Never use a service-role or secret key here.</p>
     </main>
   )
 }
 
-export default App
+function AccessDenied() {
+  const { authError, signOut } = useAuth()
+  return (
+    <main className="system-screen">
+      <div className="loading-mark">A</div>
+      <p className="eyebrow">ACCOUNT ACCESS</p>
+      <h1>Access is not available</h1>
+      <p>{authError || 'This login does not have an active AEGIS account with an assigned role. Contact your administrator.'}</p>
+      <button className="primary-button compact-button" onClick={() => void signOut()}>Sign out</button>
+    </main>
+  )
+}
+
+function RequireAuthorization() {
+  const { session, account, roles } = useAuth()
+  if (!session) return <Navigate to="/login" replace />
+  if (!account || !account.is_active || roles.length === 0) return <AccessDenied />
+  return <Outlet />
+}
+
+export default function App() {
+  const { session, loading } = useAuth()
+
+  if (!isSupabaseConfigured) return <ConfigurationScreen />
+  if (loading) return <LoadingScreen />
+
+  return (
+    <Routes>
+      <Route path="/login" element={session ? <Navigate to="/" replace /> : <LoginPage />} />
+      <Route element={<RequireAuthorization />}>
+        <Route path="/" element={<DashboardPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to={session ? '/' : '/login'} replace />} />
+    </Routes>
+  )
+}
