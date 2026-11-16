@@ -23,6 +23,7 @@ Working branch: `aegis-development`
 - Dependency audit in that build: 0 vulnerabilities.
 - Automated tests in that build: 12 passed across 2 test files.
 - TypeScript check and Vite production build: passed.
+- The latest GitHub Actions run after these changes was not independently verifiable through the available GitHub run-list interface; Vercel performed the same dependency audit, unit tests, type-check, and build as a secondary gate.
 - Bundle-size warning: resolved by lazy-loading pages and splitting the Supabase client into its own chunk.
 - Supabase inventory: 17 public tables, 62 public RLS policies, 63 public triggers.
 - Supabase data counts at review: 34 employees, 45 candidates, 0 employee document metadata rows.
@@ -95,4 +96,4 @@ Do not expose broader recruitment controls in the UI or change these database po
 
 ## Release gate
 
-AEGIS is **not production-ready** until migration source recovery, all core modules, role-specific RLS tests, candidate conversion concurrency/rollback tests, audit verification, manual workflow testing, and backup/recovery documentation are complete or formally waived.
+AEGIS is **not production-ready** until the clean migration chain is tested, all core modules are delivered, role-specific RLS tests and candidate-conversion concurrency/rollback tests pass, manual workflows are verified, and backup/recovery is documented or formally waived.
