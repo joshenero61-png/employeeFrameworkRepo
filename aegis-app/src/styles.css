@@ -140,3 +140,8 @@ button:disabled { cursor: wait; opacity: .7; }
   .employee-form-actions button { width: 100%; justify-content: center; }
   .employee-directory-link { width: 100%; }
 }
+
+.employee-pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 8px; padding-top: 16px; border-top: 1px solid var(--line); color: #87938b; font-size: 10px; }
+.employee-pagination-controls { display: flex; align-items: center; gap: 10px; }
+.employee-pagination-controls .secondary-button { min-height: 34px; padding: 0 11px; font-size: 10px; }
+.employee-pagination-controls .secondary-button:disabled { opacity: .45; cursor: not-allowed; }
