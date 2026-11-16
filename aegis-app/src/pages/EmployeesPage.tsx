@@ -50,7 +50,7 @@ export default function EmployeesPage() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
   const pageSize = 25
-  const normalizedSearch = search.trim().replace(/[^\\p{L}\\p{N}@ .'-]/gu, '').slice(0, 80)
+  const normalizedSearch = search.trim().replace(/[^\p{L}\p{N}@ .'-]/gu, '').slice(0, 80)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<EmployeeListItem | null>(null)
   const [form, setForm] = useState<EmployeeForm>(emptyForm)
@@ -80,7 +80,7 @@ export default function EmployeesPage() {
         p_search: normalizedSearch || null,
       })
       if (error) throw error
-      const rows = (data ?? []).map(({ total_count: _totalCount, ...employee }) => employee as EmployeeListItem)
+      const rows = (data ?? []).map((employee) => ({ id: employee.id, first_name: employee.first_name, last_name: employee.last_name, department_id: employee.department_id, position_id: employee.position_id, hire_date: employee.hire_date, status: employee.status }))
       return { rows, totalCount: data?.[0]?.total_count ?? 0 }
     },
   })
@@ -266,8 +266,8 @@ export default function EmployeesPage() {
                   </select>
                 </label>
                 <label>Manager
-                  <select value={form.manager_id} onChange={(event) => setForm({ ...form, manager_id: event.target.value })}>
-                    <option value="">No manager assigned</option>
+                  <select value={form.manager_id} disabled={managersQuery.isPending || managersQuery.isError} onChange={(event) => setForm({ ...form, manager_id: event.target.value })}>
+                    <option value="">{managersQuery.isPending ? 'Loading managers…' : 'No manager assigned'}</option>
                     {managerOptions.filter((employee) => employee.id !== editing?.id).map((employee) => <option key={employee.id} value={employee.id}>{employee.first_name} {employee.last_name}</option>)}
                   </select>
                 </label>
@@ -293,9 +293,9 @@ export default function EmployeesPage() {
             <input className="employee-search" type="search" placeholder={canManage ? 'Search by name or email…' : 'Search by name…'} value={search} onChange={(event) => { setSearch(event.target.value); setPage(0) }} aria-label="Search employees" />
           </div>
 
-          {(employeesQuery.error || departmentsQuery.error || positionsQuery.error) && (
+          {(employeesQuery.error || departmentsQuery.error || positionsQuery.error || managersQuery.error) && (
             <p className="form-error" role="alert">
-              {employeesQuery.error instanceof Error ? employeesQuery.error.message : departmentsQuery.error instanceof Error ? departmentsQuery.error.message : positionsQuery.error instanceof Error ? positionsQuery.error.message : 'Unable to load employee data.'}
+              {employeesQuery.error instanceof Error ? employeesQuery.error.message : departmentsQuery.error instanceof Error ? departmentsQuery.error.message : positionsQuery.error instanceof Error ? positionsQuery.error.message : managersQuery.error instanceof Error ? managersQuery.error.message : 'Unable to load employee data.'}
             </p>
           )}
 
