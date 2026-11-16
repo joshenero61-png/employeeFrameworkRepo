@@ -68,7 +68,7 @@ export default function DashboardPage() {
 
         <section className="next-stage-panel">
           <p className="eyebrow">AVAILABLE MODULE</p>
-          <h2>Employee directory is ready for initial use.</h2>
+          <h2>Employee directory is ready for preview testing.</h2>
           <p>Browse employee records, search by name or organization assignment, and maintain employee profiles when your role allows it. Supabase row-level security remains the authority for which records can be read or changed.</p>
           <Link className="primary-button compact-button employee-directory-link" to="/employees">Open employee directory <span>→</span></Link>
         </section>
