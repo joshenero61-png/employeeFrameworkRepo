@@ -1,11 +1,21 @@
-# Supabase migrations
+# Supabase project workflow
 
-This directory currently contains the new document-path hardening migration:
+The Supabase migration directory contains the complete 15-migration history recorded by the connected project. The 11 historical SQL files that were absent from GitHub were restored from `supabase_migrations.schema_migrations.statements` and checked against the ledger.
 
-- `20261116055624_restrict_document_storage_object_paths.sql`
+## Safety rules
 
-**Important migration-history note:** the connected Supabase project already had 11 earlier migrations applied before this file was added. Their version/name records exist in the hosted migration history, but their SQL files have not yet been imported into this repository.
+- Treat the connected Supabase project as the source of truth until a clean local migration test has passed.
+- Do not run `supabase db reset` against the connected remote project. It is destructive.
+- Before any remote `supabase db push`, inspect the migration diff, confirm the target project, and take/verify a backup.
+- Test the full migration chain against a disposable local database or approved Supabase branch before production release.
+- Keep `private` out of the exposed PostgREST schema list. Only public wrapper RPCs should be exposed.
+- Never put a Supabase service-role key in the browser or in committed environment files.
 
-This means the directory is not yet a complete, reproducible database history. Do not run `supabase db reset` or `supabase db push` from this repository until the earlier migration files have been recovered or a verified baseline has been created and reconciled with the hosted migration history.
+## Local setup
 
-The next database-maintenance task is to backfill and verify the existing migration history, then use version-controlled migrations for all future schema and policy changes.
+1. Install a supported Node.js runtime (see `aegis-app/package.json` engines) and the Supabase CLI.
+2. Link the CLI to the project referenced by `project_id` in `config.toml`.
+3. Start a disposable local Supabase stack and run the full migration chain there.
+4. Run the AEGIS application tests and verify role-specific RLS behavior before proposing any remote migration.
+
+The project reference in `config.toml` is an identifier, not a credential.
