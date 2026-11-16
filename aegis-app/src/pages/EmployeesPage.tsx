@@ -12,6 +12,14 @@ type EmployeeListItem = Pick<Employee, 'id' | 'first_name' | 'last_name' | 'depa
 type Department = Pick<Tables<'departments'>, 'id' | 'name'>
 type Position = Pick<Tables<'positions'>, 'id' | 'department_id' | 'title' | 'is_active'>
 
+function getLocalDate() {
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 const emptyForm: EmployeeForm = {
   first_name: '',
   last_name: '',
@@ -20,7 +28,7 @@ const emptyForm: EmployeeForm = {
   department_id: '',
   position_id: '',
   manager_id: '',
-  hire_date: new Date().toISOString().slice(0, 10),
+  hire_date: getLocalDate(),
   termination_date: '',
   status: 'active',
 }
@@ -57,7 +65,7 @@ export default function EmployeesPage() {
             .order('last_name')
             .order('first_name')
         : await client.from('employees')
-            .select('id, first_name, last_name, email, department_id, position_id, hire_date, status')
+            .select('id, first_name, last_name, department_id, position_id, hire_date, status')
             .order('last_name')
             .order('first_name')
       if (result.error) throw result.error
