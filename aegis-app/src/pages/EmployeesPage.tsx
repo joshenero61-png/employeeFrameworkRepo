@@ -1,9 +1,9 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { z } from 'zod'
 import { useAuth } from '../auth/AuthContext'
 import { supabase } from '../lib/supabase'
+import { employeeFormSchema, type EmployeeForm } from '../lib/employeeValidation'
 import type { Tables, TablesInsert, TablesUpdate } from '../types/database.types'
 
 type Employee = Tables<'employees'>
@@ -11,18 +11,6 @@ type EmployeeListItem = Pick<Employee, 'id' | 'first_name' | 'last_name' | 'depa
   Partial<Pick<Employee, 'email' | 'phone' | 'manager_id' | 'termination_date'>>
 type Department = Pick<Tables<'departments'>, 'id' | 'name'>
 type Position = Pick<Tables<'positions'>, 'id' | 'department_id' | 'title' | 'is_active'>
-
-type EmployeeForm = {
-  first_name: string
-  last_name: string
-  email: string
-  phone: string
-  department_id: string
-  position_id: string
-  manager_id: string
-  hire_date: string
-  status: 'active' | 'on_leave' | 'terminated'
-}
 
 const emptyForm: EmployeeForm = {
   first_name: '',
@@ -33,20 +21,9 @@ const emptyForm: EmployeeForm = {
   position_id: '',
   manager_id: '',
   hire_date: new Date().toISOString().slice(0, 10),
+  termination_date: '',
   status: 'active',
 }
-
-const employeeSchema = z.object({
-  first_name: z.string().trim().min(1, 'First name is required.'),
-  last_name: z.string().trim().min(1, 'Last name is required.'),
-  email: z.string().trim().email('Enter a valid email address.'),
-  phone: z.string().trim(),
-  department_id: z.string().uuid('Choose a department.'),
-  position_id: z.string().uuid('Choose a position.'),
-  manager_id: z.union([z.string().uuid(), z.literal('')]),
-  hire_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a valid hire date.'),
-  status: z.enum(['active', 'on_leave', 'terminated']),
-})
 
 const statusLabels: Record<Employee['status'], string> = {
   active: 'Active',
@@ -108,7 +85,7 @@ export default function EmployeesPage() {
 
   const saveEmployee = useMutation({
     mutationFn: async (values: EmployeeForm) => {
-      const parsed = employeeSchema.safeParse(values)
+      const parsed = employeeFormSchema.safeParse(values)
       if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Check the employee details.')
       const payload: TablesUpdate<'employees'> = {
         first_name: parsed.data.first_name,
@@ -119,6 +96,7 @@ export default function EmployeesPage() {
         position_id: parsed.data.position_id,
         manager_id: parsed.data.manager_id || null,
         hire_date: parsed.data.hire_date,
+        termination_date: parsed.data.termination_date || null,
         status: parsed.data.status,
       }
 
@@ -180,6 +158,7 @@ export default function EmployeesPage() {
       position_id: employee.position_id,
       manager_id: employee.manager_id ?? '',
       hire_date: employee.hire_date,
+      termination_date: employee.termination_date ?? '',
       status: employee.status as EmployeeForm['status'],
     })
     setFormError(null)
@@ -264,6 +243,7 @@ export default function EmployeesPage() {
                   </select>
                 </label>
                 <label>Hire date<input required type="date" value={form.hire_date} onChange={(event) => setForm({ ...form, hire_date: event.target.value })} /></label>
+                <label>Termination date<input type="date" value={form.termination_date} min={form.hire_date} onChange={(event) => setForm({ ...form, termination_date: event.target.value })} /></label>
                 <label>Status
                   <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as EmployeeForm['status'] })}>
                     <option value="active">Active</option>
