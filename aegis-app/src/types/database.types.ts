@@ -1,6 +1,3 @@
-// Generated from the connected AEGIS Supabase project.
-// Regenerate after database schema changes; do not edit by hand.
-
 export type Json =
   | string
   | number
@@ -298,6 +295,7 @@ export type Database = {
         Row: {
           document_type: string
           employee_id: string
+          employee_visible: boolean
           file_name: string
           file_size_bytes: number | null
           id: string
@@ -309,6 +307,7 @@ export type Database = {
         Insert: {
           document_type: string
           employee_id: string
+          employee_visible?: boolean
           file_name: string
           file_size_bytes?: number | null
           id?: string
@@ -320,6 +319,7 @@ export type Database = {
         Update: {
           document_type?: string
           employee_id?: string
+          employee_visible?: boolean
           file_name?: string
           file_size_bytes?: number | null
           id?: string
@@ -788,6 +788,18 @@ export type Database = {
           p_salary?: number
         }
         Returns: string
+      }
+      get_employee_directory: {
+        Args: never
+        Returns: {
+          department_id: string
+          first_name: string
+          hire_date: string
+          id: string
+          last_name: string
+          position_id: string
+          status: string
+        }[]
       }
     }
     Enums: {
