@@ -19,7 +19,7 @@
       ]
     }
   ],
-  "installCommand": "cd aegis-app && npm install --no-audit",
+  "installCommand": "cd aegis-app && npm install --no-audit --strict-allow-scripts",
   "buildCommand": "cd aegis-app && npm run build",
   "outputDirectory": "aegis-app/dist",
   "rewrites": [
