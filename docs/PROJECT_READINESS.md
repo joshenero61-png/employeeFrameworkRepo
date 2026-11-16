@@ -84,6 +84,18 @@ Do not silently invent these decisions. Obtain owner approval before implementin
 | OD-11 | First-release operational reports | Pending. |
 | OD-12 | Backup retention, RTO, and RPO | Pending. |
 
+
+## Role-matrix discrepancies requiring owner approval
+
+The live recruitment RLS policies do not fully match the Functional Solution Design Document:
+
+- HR Manager currently has insert/update access to clients, candidates, job openings, and applications; the design document describes HR as read-only, while the QA specification labels some of these permissions optional.
+- Recruiter currently has insert/update access but not delete access for those same resources, despite the design matrix describing recruiter full CRUD.
+- HR Manager currently has broad interview visibility; the design describes assigned-only visibility.
+- Interviewer employees currently have an update policy, while the design matrix describes interviewer read access.
+
+Do not expose broader recruitment controls in the UI or change these database policies until the owner confirms which role matrix is authoritative. The compensation policy also currently allows Admin and HR Manager; OD-02 requires explicit confirmation of which HR users are authorized.
+
 ## Release gate
 
 AEGIS is **not production-ready** until migration source recovery, all core modules, role-specific RLS tests, candidate conversion concurrency/rollback tests, audit verification, manual workflow testing, and backup/recovery documentation are complete or formally waived.
