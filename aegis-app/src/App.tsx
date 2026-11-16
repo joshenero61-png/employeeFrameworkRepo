@@ -3,6 +3,7 @@ import { useAuth } from './auth/AuthContext'
 import { hasAuthorizedAccess } from './auth/authorization'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
+import EmployeesPage from './pages/EmployeesPage'
 import { isSupabaseConfigured } from './lib/supabase'
 
 function LoadingScreen() {
@@ -52,6 +53,7 @@ export default function App() {
       <Route path="/login" element={session ? <Navigate to="/" replace /> : <LoginPage />} />
       <Route element={<RequireAuthorization />}>
         <Route path="/" element={<DashboardPage />} />
+        <Route path="/employees" element={<EmployeesPage />} />
       </Route>
       <Route path="*" element={<Navigate to={session ? '/' : '/login'} replace />} />
     </Routes>
