@@ -60,7 +60,7 @@ function getClient() {
 }
 
 export default function EmployeesPage() {
-  const { account, roles, signOut } = useAuth()
+  const { roles, signOut } = useAuth()
   const queryClient = useQueryClient()
   const canManage = roles.includes('admin') || roles.includes('hr_manager')
   const [search, setSearch] = useState('')
@@ -174,7 +174,7 @@ export default function EmployeesPage() {
     setForm({
       first_name: employee.first_name,
       last_name: employee.last_name,
-      email: employee.email,
+      email: employee.email ?? '',
       phone: employee.phone ?? '',
       department_id: employee.department_id,
       position_id: employee.position_id,
