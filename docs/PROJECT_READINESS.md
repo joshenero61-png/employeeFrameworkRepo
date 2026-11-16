@@ -11,23 +11,26 @@ Working branch: `aegis-development`
 - Employee directory search and department/position labels.
 - Recruiter and employee reads use `public.get_employee_directory()`, which returns only non-sensitive profile fields.
 - Employee status remains database-controlled (new records default to `active`) until the lifecycle decision is approved.
+- Employee directory lists use 25-row server-side pagination, bounded search, and a 100-row maximum RPC page size.
+- Employee query cache is scoped by user/role and cleared on sign-out.
 - Employee-document visibility is opt-in through `employee_documents.employee_visible`; the default is `false`.
-- Vercel preview builds run unit tests before the production bundle build.
+- Vercel preview builds run dependency audit, unit tests, and the production bundle build before publishing a preview.
 - Vercel Preview environment variables are scoped to `aegis-development`; no Production environment variables were added.
 
 ## Latest verified evidence
 
-- Vercel preview build for commit `b7d17d9922ec3df9c129c84016d416571f2e714c`: READY.
+- Vercel preview build for commit `9607e53ac095a3089367996fa407c2e09ce5f590`: READY.
+- Dependency audit in that build: 0 vulnerabilities.
 - Automated tests in that build: 12 passed across 2 test files.
 - TypeScript check and Vite production build: passed.
 - Bundle-size warning: resolved by lazy-loading pages and splitting the Supabase client into its own chunk.
 - Supabase inventory: 17 public tables, 62 public RLS policies, 63 public triggers.
 - Supabase data counts at review: 34 employees, 45 candidates, 0 employee document metadata rows.
-- Supabase migration history: 14 applied migrations.
+- Supabase migration history: 15 applied migrations; all 15 matching SQL files are now tracked and verified against the hosted ledger.
 - Security advisor after the employee-directory hardening: only the previously acknowledged leaked-password-protection warning remains.
 - Performance advisor reports 20 unused indexes. These are informational on the current test dataset and have not been removed.
 
-The latest repository change after the verified build updates Content Security Policy headers; its preview build is pending verification.
+The latest application code includes bounded pagination and the employee-directory RPC. Subsequent changes restored migration source files and added Supabase CLI documentation/configuration; the latest Vercel preview for the repository head is queued.
 
 ## Database security changes applied
 
@@ -39,15 +42,9 @@ The latest repository change after the verified build updates Content Security P
 
 ## Critical release blockers
 
-### Migration source recovery
+### Clean-environment migration verification
 
-The live database records 14 migrations, but only 3 corresponding SQL files are currently tracked in this repository:
-
-- `20261116055624_restrict_document_storage_object_paths.sql`
-- `20261116205839_restrict_employee_data_visibility_and_directory_rpc.sql`
-- `20261116205959_move_employee_directory_definer_into_private_schema.sql`
-
-The original 11 migration files are missing. Do not run `supabase db reset` or rely on a clean-environment migration until those sources are recovered or a reviewed baseline is reconstructed and tested.
+All 15 migration files have now been restored from the hosted migration ledger and verified against the recorded SQL statements. The clean-environment migration chain has not yet been executed in a disposable local database or Supabase branch. Do not run a destructive reset against the connected remote project.
 
 ### Reproducible dependency installation
 
