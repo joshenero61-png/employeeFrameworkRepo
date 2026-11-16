@@ -77,10 +77,10 @@ export default function EmployeesPage() {
       const { data, error } = await client.rpc('get_employee_directory', {
         p_limit: pageSize,
         p_offset: page * pageSize,
-        p_search: normalizedSearch || null,
+        p_search: normalizedSearch,
       })
       if (error) throw error
-      const rows = (data ?? []).map((employee) => ({ id: employee.id, first_name: employee.first_name, last_name: employee.last_name, department_id: employee.department_id, position_id: employee.position_id, hire_date: employee.hire_date, status: employee.status }))
+      const rows = (data ?? []).map((employee) => ({ id: employee.id, first_name: employee.first_name, last_name: employee.last_name, department_id: employee.department_id, position_id: employee.position_id, hire_date: employee.hire_date, status: employee.status })) as EmployeeListItem[]
       return { rows, totalCount: data?.[0]?.total_count ?? 0 }
     },
   })
