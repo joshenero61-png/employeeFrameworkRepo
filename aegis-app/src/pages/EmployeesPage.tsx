@@ -11,6 +11,7 @@ type EmployeeListItem = Pick<Employee, 'id' | 'first_name' | 'last_name' | 'depa
   Partial<Pick<Employee, 'email' | 'phone' | 'manager_id'>>
 type Department = Pick<Tables<'departments'>, 'id' | 'name'>
 type Position = Pick<Tables<'positions'>, 'id' | 'department_id' | 'title' | 'is_active'>
+type EmployeeOption = Pick<Employee, 'id' | 'first_name' | 'last_name'>
 
 function getLocalDate() {
   const date = new Date()
@@ -47,6 +48,9 @@ export default function EmployeesPage() {
   const queryClient = useQueryClient()
   const canManage = roles.includes('admin') || roles.includes('hr_manager')
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(0)
+  const pageSize = 25
+  const normalizedSearch = search.trim().replace(/[^\\p{L}\\p{N}@ .'-]/gu, '').slice(0, 80)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<EmployeeListItem | null>(null)
   const [form, setForm] = useState<EmployeeForm>(emptyForm)
@@ -54,17 +58,30 @@ export default function EmployeesPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
 
   const employeesQuery = useQuery({
-    queryKey: ['employees', session?.user.id ?? null, canManage, roles.join(',')],
+    queryKey: ['employees', session?.user.id ?? null, canManage, roles.join(','), page, normalizedSearch],
     queryFn: async () => {
       const client = getClient()
-      const result = canManage
-        ? await client.from('employees')
-            .select('id, first_name, last_name, email, phone, department_id, position_id, manager_id, hire_date, status')
-            .order('last_name')
-            .order('first_name')
-        : await client.rpc('get_employee_directory')
-      if (result.error) throw result.error
-      return (result.data ?? []) as EmployeeListItem[]
+      if (canManage) {
+        let query = client.from('employees')
+          .select('id, first_name, last_name, email, phone, department_id, position_id, manager_id, hire_date, status', { count: 'exact' })
+          .order('last_name')
+          .order('first_name')
+        if (normalizedSearch) {
+          query = query.or(`first_name.ilike.%${normalizedSearch}%,last_name.ilike.%${normalizedSearch}%,email.ilike.%${normalizedSearch}%`)
+        }
+        const { data, error, count } = await query.range(page * pageSize, (page + 1) * pageSize - 1)
+        if (error) throw error
+        return { rows: (data ?? []) as EmployeeListItem[], totalCount: count ?? 0 }
+      }
+
+      const { data, error } = await client.rpc('get_employee_directory', {
+        p_limit: pageSize,
+        p_offset: page * pageSize,
+        p_search: normalizedSearch || null,
+      })
+      if (error) throw error
+      const rows = (data ?? []).map(({ total_count: _totalCount, ...employee }) => employee as EmployeeListItem)
+      return { rows, totalCount: data?.[0]?.total_count ?? 0 }
     },
   })
 
@@ -85,6 +102,21 @@ export default function EmployeesPage() {
       return data as Position[]
     },
   })
+  const managersQuery = useQuery({
+    queryKey: ['employee-manager-options', session?.user.id ?? null],
+    enabled: canManage,
+    queryFn: async () => {
+      const { data, error } = await getClient()
+        .from('employees')
+        .select('id, first_name, last_name')
+        .order('last_name')
+        .order('first_name')
+        .limit(500)
+      if (error) throw error
+      return (data ?? []) as EmployeeOption[]
+    },
+  })
+
 
   const saveEmployee = useMutation({
     mutationFn: async (values: EmployeeForm) => {
@@ -128,17 +160,14 @@ export default function EmployeesPage() {
 
   const departments = departmentsQuery.data ?? []
   const positions = positionsQuery.data ?? []
-  const employees = employeesQuery.data ?? []
+  const employees = employeesQuery.data?.rows ?? []
+  const managerOptions = managersQuery.data ?? []
+  const totalCount = employeesQuery.data?.totalCount ?? 0
+  const totalPages = Math.ceil(totalCount / pageSize)
+  const firstVisible = totalCount === 0 ? 0 : page * pageSize + 1
+  const lastVisible = Math.min((page + 1) * pageSize, totalCount)
   const departmentNames = useMemo(() => new Map(departments.map((item) => [item.id, item.name])), [departments])
   const positionNames = useMemo(() => new Map(positions.map((item) => [item.id, item.title])), [positions])
-  const filteredEmployees = useMemo(() => {
-    const term = search.trim().toLowerCase()
-    if (!term) return employees
-    return employees.filter((employee) =>
-      [employee.first_name, employee.last_name, employee.email ?? '', departmentNames.get(employee.department_id) ?? '', positionNames.get(employee.position_id) ?? '', employee.status]
-        .some((value) => value.toLowerCase().includes(term)),
-    )
-  }, [employees, search, departmentNames, positionNames])
 
   function openCreateForm() {
     setEditing(null)
@@ -239,7 +268,7 @@ export default function EmployeesPage() {
                 <label>Manager
                   <select value={form.manager_id} onChange={(event) => setForm({ ...form, manager_id: event.target.value })}>
                     <option value="">No manager assigned</option>
-                    {employees.filter((employee) => employee.id !== editing?.id).map((employee) => <option key={employee.id} value={employee.id}>{employee.first_name} {employee.last_name}</option>)}
+                    {managerOptions.filter((employee) => employee.id !== editing?.id).map((employee) => <option key={employee.id} value={employee.id}>{employee.first_name} {employee.last_name}</option>)}
                   </select>
                 </label>
                 <label>Hire date<input required type="date" value={form.hire_date} onChange={(event) => setForm({ ...form, hire_date: event.target.value })} /></label>
@@ -259,9 +288,9 @@ export default function EmployeesPage() {
           <div className="employee-list-toolbar">
             <div>
               <p className="eyebrow">DIRECTORY</p>
-              <h2>{employeesQuery.isPending ? 'Loading employees…' : `${filteredEmployees.length} employee${filteredEmployees.length === 1 ? '' : 's'}`}</h2>
+              <h2>{employeesQuery.isPending ? 'Loading employees…' : `${totalCount} employee${totalCount === 1 ? '' : 's'}`}</h2>
             </div>
-            <input className="employee-search" type="search" placeholder="Search by name, email, department…" value={search} onChange={(event) => setSearch(event.target.value)} aria-label="Search employees" />
+            <input className="employee-search" type="search" placeholder={canManage ? 'Search by name or email…' : 'Search by name…'} value={search} onChange={(event) => { setSearch(event.target.value); setPage(0) }} aria-label="Search employees" />
           </div>
 
           {(employeesQuery.error || departmentsQuery.error || positionsQuery.error) && (
@@ -270,14 +299,14 @@ export default function EmployeesPage() {
             </p>
           )}
 
-          {employeesQuery.isPending ? <p className="empty-state">Loading employee records…</p> : employeesQuery.isError ? null : filteredEmployees.length === 0 ? (
+          {employeesQuery.isPending ? <p className="empty-state">Loading employee records…</p> : employeesQuery.isError ? null : employees.length === 0 ? (
             <p className="empty-state">{search ? 'No employees match that search.' : 'No employee records are available to this account.'}</p>
           ) : (
             <div className="employee-table-wrap">
               <table className="employee-table">
                 <thead><tr><th>Employee</th><th>Department</th><th>Position</th><th>Status</th><th>Hire date</th>{canManage && <th>Contact</th>}{canManage && <th aria-label="Actions" />}</tr></thead>
                 <tbody>
-                  {filteredEmployees.map((employee) => (
+                  {employees.map((employee) => (
                     <tr key={employee.id}>
                       <td><strong>{employee.first_name} {employee.last_name}</strong>{canManage && <span>{employee.email}</span>}</td>
                       <td>{departmentNames.get(employee.department_id) ?? '—'}</td>
@@ -290,6 +319,16 @@ export default function EmployeesPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {totalCount > pageSize && (
+            <div className="employee-pagination">
+              <span>Showing {firstVisible}–{lastVisible} of {totalCount}</span>
+              <div className="employee-pagination-controls">
+                <button className="secondary-button" type="button" disabled={page === 0} onClick={() => setPage((current) => Math.max(0, current - 1))}>Previous</button>
+                <span>Page {page + 1} of {totalPages}</span>
+                <button className="secondary-button" type="button" disabled={page + 1 >= totalPages} onClick={() => setPage((current) => current + 1)}>Next</button>
+              </div>
             </div>
           )}
           <p className="directory-footnote">Access to employee records is enforced by Supabase row-level security. Available fields and actions depend on your assigned role.</p>
