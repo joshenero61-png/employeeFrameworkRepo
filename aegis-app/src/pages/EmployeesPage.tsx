@@ -64,10 +64,7 @@ export default function EmployeesPage() {
             .select('id, first_name, last_name, email, phone, department_id, position_id, manager_id, hire_date, termination_date, status')
             .order('last_name')
             .order('first_name')
-        : await client.from('employees')
-            .select('id, first_name, last_name, department_id, position_id, hire_date, status')
-            .order('last_name')
-            .order('first_name')
+        : await client.rpc('get_employee_directory')
       if (result.error) throw result.error
       return (result.data ?? []) as EmployeeListItem[]
     },
