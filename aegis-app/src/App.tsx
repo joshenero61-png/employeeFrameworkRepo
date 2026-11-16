@@ -1,5 +1,6 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth/AuthContext'
+import { hasAuthorizedAccess } from './auth/authorization'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import { isSupabaseConfigured } from './lib/supabase'
@@ -36,7 +37,7 @@ function AccessDenied() {
 function RequireAuthorization() {
   const { session, account, roles } = useAuth()
   if (!session) return <Navigate to="/login" replace />
-  if (!account || !account.is_active || roles.length === 0) return <AccessDenied />
+  if (!hasAuthorizedAccess(account, roles)) return <AccessDenied />
   return <Outlet />
 }
 
