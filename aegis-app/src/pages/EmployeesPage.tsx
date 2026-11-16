@@ -99,7 +99,6 @@ export default function EmployeesPage() {
         position_id: parsed.data.position_id,
         manager_id: parsed.data.manager_id || null,
         hire_date: parsed.data.hire_date,
-        status: parsed.data.status,
       }
 
       if (editing) {
