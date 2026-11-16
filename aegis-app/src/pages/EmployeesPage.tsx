@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -7,10 +7,10 @@ import { supabase } from '../lib/supabase'
 import type { Tables, TablesInsert, TablesUpdate } from '../types/database.types'
 
 type Employee = Tables<'employees'>
-type EmployeeListItem = Pick<Employee, 'id' | 'first_name' | 'last_name' | 'email' | 'department_id' | 'position_id' | 'hire_date' | 'status'> &
-  Partial<Pick<Employee, 'phone' | 'manager_id' | 'termination_date'>>
+type EmployeeListItem = Pick<Employee, 'id' | 'first_name' | 'last_name' | 'department_id' | 'position_id' | 'hire_date' | 'status'> &
+  Partial<Pick<Employee, 'email' | 'phone' | 'manager_id' | 'termination_date'>>
 type Department = Pick<Tables<'departments'>, 'id' | 'name'>
-type Position = Pick<Tables<'positions'>, 'id' | 'department_id' | 'title'>
+type Position = Pick<Tables<'positions'>, 'id' | 'department_id' | 'title' | 'is_active'>
 
 type EmployeeForm = {
   first_name: string
@@ -100,7 +100,7 @@ export default function EmployeesPage() {
   const positionsQuery = useQuery({
     queryKey: ['positions'],
     queryFn: async () => {
-      const { data, error } = await getClient().from('positions').select('id, department_id, title').eq('is_active', true).order('title')
+      const { data, error } = await getClient().from('positions').select('id, department_id, title, is_active').order('title')
       if (error) throw error
       return data as Position[]
     },
@@ -156,7 +156,7 @@ export default function EmployeesPage() {
     const term = search.trim().toLowerCase()
     if (!term) return employees
     return employees.filter((employee) =>
-      [employee.first_name, employee.last_name, employee.email, departmentNames.get(employee.department_id) ?? '', positionNames.get(employee.position_id) ?? '', employee.status]
+      [employee.first_name, employee.last_name, employee.email ?? '', departmentNames.get(employee.department_id) ?? '', positionNames.get(employee.position_id) ?? '', employee.status]
         .some((value) => value.toLowerCase().includes(term)),
     )
   }, [employees, search, departmentNames, positionNames])
@@ -187,7 +187,7 @@ export default function EmployeesPage() {
     setFormOpen(true)
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setFormError(null)
     setSaveError(null)
@@ -256,7 +256,7 @@ export default function EmployeesPage() {
                 <label>Position
                   <select required value={form.position_id} onChange={(event) => setForm({ ...form, position_id: event.target.value })} disabled={!form.department_id}>
                     <option value="">Select position</option>
-                    {positions.filter((position) => position.department_id === form.department_id).map((position) => <option key={position.id} value={position.id}>{position.title}</option>)}
+                    {positions.filter((position) => position.department_id === form.department_id && (position.is_active || position.id === form.position_id)).map((position) => <option key={position.id} value={position.id}>{position.title}{position.is_active ? '' : ' (inactive)'}</option>)}
                   </select>
                 </label>
                 <label>Manager
@@ -309,7 +309,7 @@ export default function EmployeesPage() {
                 <tbody>
                   {filteredEmployees.map((employee) => (
                     <tr key={employee.id}>
-                      <td><strong>{employee.first_name} {employee.last_name}</strong><span>{employee.email}</span></td>
+                      <td><strong>{employee.first_name} {employee.last_name}</strong>{canManage && <span>{employee.email}</span>}</td>
                       <td>{departmentNames.get(employee.department_id) ?? '—'}</td>
                       <td>{positionNames.get(employee.position_id) ?? '—'}</td>
                       <td><span className={`employee-status status-${employee.status}`}>{statusLabels[employee.status as Employee['status']] ?? employee.status}</span></td>
