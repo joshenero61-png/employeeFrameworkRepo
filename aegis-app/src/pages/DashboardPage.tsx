@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 
 const roleLabels: Record<string, string> = {
@@ -66,9 +67,15 @@ export default function DashboardPage() {
         </section>
 
         <section className="next-stage-panel">
-          <p className="eyebrow">DEVELOPMENT STATUS</p>
-          <h2>Authentication foundation is connected.</h2>
-          <p>Sign-in, session restoration, account activation checks, and database-backed role loading are in place. Employee, recruitment, leave, compensation, and document screens will be implemented in their respective development stages.</p>
+          <p className="eyebrow">AVAILABLE MODULE</p>
+          <h2>Employee directory is ready for initial use.</h2>
+          <p>Browse employee records, search by name or organization assignment, and maintain employee profiles when your role allows it. Supabase row-level security remains the authority for which records can be read or changed.</p>
+          <Link className="primary-button compact-button employee-directory-link" to="/employees">Open employee directory <span>→</span></Link>
+        </section>
+        <section className="next-stage-panel upcoming-modules">
+          <p className="eyebrow">NEXT DEVELOPMENT STAGES</p>
+          <h2>Recruitment, leave, compensation, and document workflows.</h2>
+          <p>These modules will be added against the approved functional requirements, with database authorization and automated tests verified as each workflow is delivered.</p>
         </section>
       </section>
     </main>
