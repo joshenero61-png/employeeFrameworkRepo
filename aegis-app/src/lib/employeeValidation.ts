@@ -14,8 +14,6 @@ export const employeeFormSchema = z.object({
   position_id: z.string().uuid('Choose a position.'),
   manager_id: z.union([z.string().uuid(), z.literal('')]),
   hire_date: dateOnly,
-  termination_date: z.union([dateOnly, z.literal('')]),
-  status: z.enum(['active', 'on_leave', 'terminated']),
 }).superRefine((values, context) => {
   if (values.termination_date && values.termination_date < values.hire_date) {
     context.addIssue({
