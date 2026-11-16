@@ -175,7 +175,7 @@ export default function EmployeesPage() {
     event.preventDefault()
     setFormError(null)
     setSaveError(null)
-    const parsed = employeeSchema.safeParse(form)
+    const parsed = employeeFormSchema.safeParse(form)
     if (!parsed.success) {
       setFormError(parsed.error.issues[0]?.message ?? 'Check the employee details.')
       return
