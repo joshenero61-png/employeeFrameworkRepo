@@ -1,7 +1,3 @@
--- Enforce entity-backed folder paths for private employee and candidate documents.
--- Employee objects must use: <employee_uuid>/<filename>
--- Candidate objects must use: <candidate_uuid>/<filename>
--- This prevents HR/recruitment uploads from creating orphaned or unowned paths.
 
 drop policy if exists "employee documents read by HR or owner" on storage.objects;
 create policy "employee documents read by HR or owner"
