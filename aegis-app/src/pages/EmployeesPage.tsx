@@ -8,7 +8,7 @@ import type { Tables, TablesInsert, TablesUpdate } from '../types/database.types
 
 type Employee = Tables<'employees'>
 type EmployeeListItem = Pick<Employee, 'id' | 'first_name' | 'last_name' | 'department_id' | 'position_id' | 'hire_date' | 'status'> &
-  Partial<Pick<Employee, 'email' | 'phone' | 'manager_id' | 'termination_date'>>
+  Partial<Pick<Employee, 'email' | 'phone' | 'manager_id'>>
 type Department = Pick<Tables<'departments'>, 'id' | 'name'>
 type Position = Pick<Tables<'positions'>, 'id' | 'department_id' | 'title' | 'is_active'>
 
@@ -29,8 +29,6 @@ const emptyForm: EmployeeForm = {
   position_id: '',
   manager_id: '',
   hire_date: getLocalDate(),
-  termination_date: '',
-  status: 'active',
 }
 
 const statusLabels: Record<Employee['status'], string> = {
@@ -61,7 +59,7 @@ export default function EmployeesPage() {
       const client = getClient()
       const result = canManage
         ? await client.from('employees')
-            .select('id, first_name, last_name, email, phone, department_id, position_id, manager_id, hire_date, termination_date, status')
+            .select('id, first_name, last_name, email, phone, department_id, position_id, manager_id, hire_date, status')
             .order('last_name')
             .order('first_name')
         : await client.rpc('get_employee_directory')
@@ -101,7 +99,6 @@ export default function EmployeesPage() {
         position_id: parsed.data.position_id,
         manager_id: parsed.data.manager_id || null,
         hire_date: parsed.data.hire_date,
-        termination_date: parsed.data.termination_date || null,
         status: parsed.data.status,
       }
 
@@ -163,8 +160,6 @@ export default function EmployeesPage() {
       position_id: employee.position_id,
       manager_id: employee.manager_id ?? '',
       hire_date: employee.hire_date,
-      termination_date: employee.termination_date ?? '',
-      status: employee.status as EmployeeForm['status'],
     })
     setFormError(null)
     setSaveError(null)
@@ -249,14 +244,6 @@ export default function EmployeesPage() {
                   </select>
                 </label>
                 <label>Hire date<input required type="date" value={form.hire_date} onChange={(event) => setForm({ ...form, hire_date: event.target.value })} /></label>
-                <label>Termination date<input type="date" value={form.termination_date} min={form.hire_date} onChange={(event) => setForm({ ...form, termination_date: event.target.value })} /></label>
-                <label>Status
-                  <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as EmployeeForm['status'] })}>
-                    <option value="active">Active</option>
-                    <option value="on_leave">On leave</option>
-                    <option value="terminated">Terminated</option>
-                  </select>
-                </label>
               </div>
               {formError && <p className="form-error" role="alert">{formError}</p>}
               <div className="employee-form-actions">
