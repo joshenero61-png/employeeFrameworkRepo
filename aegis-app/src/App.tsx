@@ -2,10 +2,11 @@ import { lazy, Suspense } from 'react'
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth/AuthContext'
 import { hasAuthorizedAccess } from './auth/authorization'
+import { isSupabaseConfigured } from './lib/supabase'
+
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const EmployeesPage = lazy(() => import('./pages/EmployeesPage'))
-import { isSupabaseConfigured } from './lib/supabase'
 
 function LoadingScreen() {
   return <main className="system-screen"><div className="loading-mark">A</div><p>Preparing your workspace…</p></main>
