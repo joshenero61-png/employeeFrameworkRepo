@@ -790,7 +790,7 @@ export type Database = {
         Returns: string
       }
       get_employee_directory: {
-        Args: never
+        Args: { p_limit?: number; p_offset?: number; p_search?: string }
         Returns: {
           department_id: string
           first_name: string
@@ -799,6 +799,7 @@ export type Database = {
           last_name: string
           position_id: string
           status: string
+          total_count: number
         }[]
       }
     }
