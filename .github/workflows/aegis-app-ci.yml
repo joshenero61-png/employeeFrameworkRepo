@@ -27,5 +27,22 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
+      - name: Audit dependency vulnerabilities
+        run: |
+          npm audit --json > npm-audit.json || true
+          node --input-type=commonjs -e "
+            const report = require('./npm-audit.json');
+            const vulnerabilities = Object.values(report.vulnerabilities || {});
+            console.log('Dependency vulnerability summary:', JSON.stringify(report.metadata?.vulnerabilities || {}));
+            for (const item of vulnerabilities) {
+              console.log(JSON.stringify({
+                name: item.name,
+                severity: item.severity,
+                isDirect: item.isDirect,
+                range: item.range,
+                fixAvailable: item.fixAvailable
+              }));
+            }
+          "
       - name: Type-check and build
         run: npm run build
